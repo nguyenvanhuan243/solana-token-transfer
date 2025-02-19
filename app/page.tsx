@@ -50,6 +50,34 @@ function Home() {
 			console.error('Error fetching Sol balance:', error);
 		}
 	};
+
+	const renderConnectButton = () => {
+		// User connected phantom wallet
+		if (walletAddress) {
+			return (
+				<div className="absolute top-0 right-0 m-4 flex items-center">
+					<div className="bg-black p-2 rounded border-2 border-gray-500 text-sm flex items-center">
+						<img src="/phantom-logo.svg" alt="Phantom Logo" width={24} height={24} />
+						<span className="ml-2">{formatAddress(walletAddress)}</span>
+					</div>
+					<button onClick={disconnectWallet} className="ml-2 bg-black text-white font-bold py-2 px-4 rounded border-2 border-gray-500 transition duration-200">
+						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="24" height="24">
+							<path fillRule="evenodd" clipRule="evenodd" d="M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm4 9V8l-5 4 5 4v-3h6v-2H9z"></path>
+						</svg>
+					</button>
+				</div>
+			)
+		}
+
+		// User not connected phantom wallet
+		return (
+			<div className="absolute top-0 right-0 m-4">
+				<button onClick={connectWallet} className="bg-black text-white font-bold py-2 px-4 rounded border-2 border-gray-500 hover:bg-gray-700 transition duration-200">
+					Connect Wallet
+				</button>
+			</div>
+		)
+	}
 	// Function to handle sending SOL
 	const handleSendSol = async () => {
 		// Ensure there's a wallet address and the adapter is available and connected
@@ -129,28 +157,9 @@ function Home() {
 						<button onClick={handleSendSol} className="bg-black text-white font-bold py-2 px-4 w-full rounded border-2 border-gray-500 hover:bg-gray-700 transition duration-200">Send</button>
 					</div>
 				</div>
-
-				{walletAddress && (
-					<div className="absolute top-0 right-0 m-4 flex items-center">
-						<div className="bg-black p-2 rounded border-2 border-gray-500 text-sm flex items-center">
-							<img src="/phantom-logo.svg" alt="Phantom Logo" width={24} height={24} />
-							<span className="ml-2">{formatAddress(walletAddress)}</span>
-						</div>
-						<button onClick={disconnectWallet} className="ml-2 bg-black text-white font-bold py-2 px-4 rounded border-2 border-gray-500 transition duration-200">
-							<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="24" height="24">
-								<path fillRule="evenodd" clipRule="evenodd" d="M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm4 9V8l-5 4 5 4v-3h6v-2H9z"></path>
-							</svg>
-						</button>
-					</div>
-				)}
-
-				{!walletAddress && (
-					<div className="absolute top-0 right-0 m-4">
-						<button onClick={connectWallet} className="bg-black text-white font-bold py-2 px-4 rounded border-2 border-gray-500 hover:bg-gray-700 transition duration-200">
-							Connect Wallet
-						</button>
-					</div>
-				)}
+				{
+					renderConnectButton()
+				}
 			</div>
 		</>
 	);
