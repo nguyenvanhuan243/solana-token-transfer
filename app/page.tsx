@@ -5,14 +5,14 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'; // Import the necessary Solana SDK components
 
 function Home() {
-    const [walletAddress, setWalletAddress] = useState(null);
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [solBalance, setSolBalance] = useState(0); // State for Sol balance
     const [recipientAddress, setRecipientAddress] = useState(''); // State for recipient address input
     const [amountToSend, setAmountToSend] = useState(''); // State for amount to send input
-    const [adapter, setAdapter] = useState(null); // State for storing the wallet adapter instance
+    const [adapter, setAdapter] = useState<PhantomWalletAdapter | null>(null); // Update type
 
     // Logic for connecting to the Phantom wallet
-      const connectWallet = async () => {
+    const connectWallet = async () => {
         if (!adapter) {
             const newAdapter = new PhantomWalletAdapter();
             try {
@@ -50,52 +50,52 @@ function Home() {
             console.error('Error fetching Sol balance:', error);
         }
     };
-// Function to handle sending SOL
-const handleSendSol = async () => {
-    // Ensure there's a wallet address and the adapter is available and connected
-    if (!walletAddress || !adapter || !adapter.connected) {
-        console.error('Please connect your wallet first.');
-        return;
-    }
+    // Function to handle sending SOL
+    const handleSendSol = async () => {
+        // Ensure there's a wallet address and the adapter is available and connected
+        if (!walletAddress || !adapter || !adapter.connected) {
+            console.error('Please connect your wallet first.');
+            return;
+        }
 
-    try {
-        // No need to reconnect the adapter; it should already be connected and stored in state
+        try {
+            // No need to reconnect the adapter; it should already be connected and stored in state
 
-        const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
-        const recipientPublicKey = new PublicKey(recipientAddress); // Convert the recipient address to a PublicKey
-        const senderPublicKey = new PublicKey(walletAddress); // Convert the sender (wallet) address to a PublicKey
-        const amountLamports = Number(amountToSend) * 10 ** 9; // Convert SOL to lamports for the transaction amount
+            const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+            const recipientPublicKey = new PublicKey(recipientAddress); // Convert the recipient address to a PublicKey
+            const senderPublicKey = new PublicKey(walletAddress); // Convert the sender (wallet) address to a PublicKey
+            const amountLamports = Number(amountToSend) * 10 ** 9; // Convert SOL to lamports for the transaction amount
 
-        // Create a new transaction
-        let transaction = new Transaction().add(
-            SystemProgram.transfer({
-                fromPubkey: senderPublicKey,
-                toPubkey: recipientPublicKey,
-                lamports: amountLamports,
-            })
-        );
+            // Create a new transaction
+            let transaction = new Transaction().add(
+                SystemProgram.transfer({
+                    fromPubkey: senderPublicKey,
+                    toPubkey: recipientPublicKey,
+                    lamports: amountLamports,
+                })
+            );
 
-        // Set transaction's fee payer and recent blockhash
-        transaction.feePayer = senderPublicKey;
-        let {blockhash} = await connection.getRecentBlockhash();
-        transaction.recentBlockhash = blockhash;
+            // Set transaction's fee payer and recent blockhash
+            transaction.feePayer = senderPublicKey;
+            let { blockhash } = await connection.getRecentBlockhash();
+            transaction.recentBlockhash = blockhash;
 
-        // Sign the transaction using the Phantom Wallet adapter
-        const signedTransaction = await adapter.signTransaction(transaction);
+            // Sign the transaction using the Phantom Wallet adapter
+            const signedTransaction = await adapter.signTransaction(transaction);
 
-        // Send the signed transaction to the Solana blockchain
-        const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+            // Send the signed transaction to the Solana blockchain
+            const signature = await connection.sendRawTransaction(signedTransaction.serialize());
 
-        console.log('Transaction successful with signature:', signature);
+            console.log('Transaction successful with signature:', signature);
 
-        // Optionally, confirm the transaction
-        await connection.confirmTransaction(signature, 'confirmed');
+            // Optionally, confirm the transaction
+            await connection.confirmTransaction(signature, 'confirmed');
 
-        console.log('Transaction confirmed');
-    } catch (error) {
-        console.error('Error during the transaction:', error);
-    }
-};
+            console.log('Transaction confirmed');
+        } catch (error) {
+            console.error('Error during the transaction:', error);
+        }
+    };
     useEffect(() => {
         if (walletAddress) {
             fetchSolBalance(walletAddress);
